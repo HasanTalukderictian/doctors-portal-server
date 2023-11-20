@@ -32,20 +32,49 @@ async function run() {
     const bookingColletion = client.db("DoctorsPortal").collection("bookings");
     const serviceCollection = client.db("DoctorsPortal").collection("services");
 
-    app.post('/bookings/:id', async(req, res) => {
-        const id = req.body.id;
-        const booking = req.body;
-        console.log(booking);
-        const result = await bookingColletion.insertOne(booking);
-        res.send(result);
-    })
-
-    app.get('/services', async(req, res) => {
-        const query ={}
-        const result = await serviceCollection.find(query).toArray();
+    app.post('/bookings', async (req, res) => {
+      const booking = req.body;
+      const query = { treatment: booking.treatment, date: booking.date };
+      const existingBooking = await bookingColletion.findOne(query);
   
-        res.send(result);
-    })
+      if (existingBooking) {
+          return res.json({ success: false, booking: existingBooking });
+      }
+  
+      try {
+          const result = await bookingColletion.insertOne(booking);
+          return res.json({ success: true, result });
+      } catch (error) {
+          console.error(error);
+          return res.status(500).json({ success: false, error: 'Internal Server Error' });
+      }
+  });
+
+    // app.get('/services', async(req, res) => {
+    //     const query ={}
+    //     const result = await serviceCollection.find(query).toArray();
+  
+    //     res.send(result);
+    // })
+
+    app.get('/available', async (req, res) => {
+      const date = req.query.date;
+      const services = await serviceCollection.find().toArray();
+      const query = { date: date };
+      const booking = await bookingColletion.find(query).toArray();
+  
+      services.forEach(service => {
+          const serviceBookings = booking.filter(book => book.treatment === service.name);
+  
+          const bookedSlot = serviceBookings.map(book => book.slot);
+  
+          const available = service.slots.filter(slot => !bookedSlot.includes(slot));
+          service.slots = available;
+      });
+  
+      // Send the response outside the forEach loop
+      res.send(services);
+  });
 
 
     // Connect the client to the server	(optional starting in v4.7)
