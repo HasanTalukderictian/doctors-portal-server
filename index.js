@@ -34,47 +34,60 @@ async function run() {
 
     app.post('/bookings', async (req, res) => {
       const booking = req.body;
-      const query = { treatment: booking.treatment, date: booking.date };
+      const query = { treatment: booking.treatment, date: booking.date, email: booking.email };
       const existingBooking = await bookingColletion.findOne(query);
-  
-      if (existingBooking) {
-          return res.json({ success: false, booking: existingBooking });
-      }
-  
-      try {
-          const result = await bookingColletion.insertOne(booking);
-          return res.json({ success: true, result });
-      } catch (error) {
-          console.error(error);
-          return res.status(500).json({ success: false, error: 'Internal Server Error' });
-      }
-  });
 
-    // app.get('/services', async(req, res) => {
-    //     const query ={}
-    //     const result = await serviceCollection.find(query).toArray();
-  
-    //     res.send(result);
-    // })
+      if (existingBooking) {
+        return res.json({ success: false, booking: existingBooking });
+      }
+
+      try {
+        const result = await bookingColletion.insertOne(booking);
+        return res.json({ success: true, result });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, error: 'Internal Server Error' });
+      }
+    });
+
 
     app.get('/available', async (req, res) => {
       const date = req.query.date;
       const services = await serviceCollection.find().toArray();
       const query = { date: date };
       const booking = await bookingColletion.find(query).toArray();
-  
+
       services.forEach(service => {
-          const serviceBookings = booking.filter(book => book.treatment === service.name);
-  
-          const bookedSlot = serviceBookings.map(book => book.slot);
-  
-          const available = service.slots.filter(slot => !bookedSlot.includes(slot));
-          service.slots = available;
+        const serviceBookings = booking.filter(book => book.treatment === service.name);
+
+        const bookedSlot = serviceBookings.map(book => book.slot);
+
+        const available = service.slots.filter(slot => !bookedSlot.includes(slot));
+        service.slots = available;
       });
-  
+
       // Send the response outside the forEach loop
       res.send(services);
-  });
+    });
+
+
+    // app.get('/booking', async(req, res) => {
+    //   const patient = req.query.email;
+    //   const query = { patient: patient}
+    //   const bookings = await bookingColletion.find(query).toArray();
+    //   res.send(bookings);
+    // })
+
+
+
+    app.get('/booking', async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const bookings = await bookingColletion.find(query).toArray();
+      res.send(bookings);
+    });
+
+
 
 
     // Connect the client to the server	(optional starting in v4.7)
