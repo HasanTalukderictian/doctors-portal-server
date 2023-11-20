@@ -4,7 +4,7 @@ const cors = require('cors')
 const port = process.env.PORT || 5000;
 require('dotenv').config()
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 //DoctorsPortal
 //Bookings
@@ -86,7 +86,15 @@ async function run() {
       const bookings = await bookingColletion.find(query).toArray();
       res.send(bookings);
     });
+     
 
+    app.delete('/bookings/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await bookingColletion.deleteOne(query);
+      res.send(result);
+
+    })
 
 
 
