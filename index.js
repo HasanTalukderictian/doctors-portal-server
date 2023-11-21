@@ -31,6 +31,7 @@ async function run() {
 
     const bookingColletion = client.db("DoctorsPortal").collection("bookings");
     const serviceCollection = client.db("DoctorsPortal").collection("services");
+    const usersCollection = client.db("DoctorsPortal").collection("users");
 
     app.post('/bookings', async (req, res) => {
       const booking = req.body;
@@ -69,7 +70,19 @@ async function run() {
       // Send the response outside the forEach loop
       res.send(services);
     });
+    
 
+    app.put('/users/:email', async(req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = {email:email}
+      const options = { upsert : true};
+      const updateDoc = {
+        $set:user,
+      }
+      const result = await usersCollection.updateOne(filter,updateDoc, options);
+      res.send(user);
+    })
 
     // app.get('/booking', async(req, res) => {
     //   const patient = req.query.email;
