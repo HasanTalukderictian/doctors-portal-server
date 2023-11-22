@@ -16,7 +16,7 @@ app.use(express.json())
 
 
 const verifyJwt = (req, res, next) => {
-  // console.log('hitting VerifyJwt');
+  console.log('hitting VerifyJwt');
 
   const authorization = req.headers.authorization;
   if (!authorization) {
@@ -25,7 +25,7 @@ const verifyJwt = (req, res, next) => {
   // bearer token
   const token = authorization.split(' ')[1];
 
-  console.log('token inside verify jwt', token);
+  // console.log('token inside verify jwt', token);
   jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
     if (err) {
       return res.status(401).send({ error: true, message: 'unauthorized access' })
@@ -96,7 +96,7 @@ async function run() {
     app.post('/jwt', async (req, res) => {
       const users = req.body;
       console.log(users);
-      const token = jwt.sign(users, process.env.ACCESS_TOKEN,  { expiresIn: '1h' });
+      const token = jwt.sign(users, process.env.ACCESS_TOKEN,  { expiresIn: '1000h' });
       res.send({token});
     })
 
@@ -122,7 +122,8 @@ async function run() {
 
 
 
-    app.get('/booking', async (req, res) => {
+    app.get('/booking', verifyJwt, async (req, res) => {
+      // console.log(req.headers.authorization)
       const email = req.query.email;
       const query = { email: email };
       const bookings = await bookingColletion.find(query).toArray();
