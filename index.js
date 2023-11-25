@@ -10,6 +10,8 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 //DoctorsPortal
 //Bookings
 
+
+
 app.use(cors())
 app.use(express.json())
 
@@ -99,7 +101,18 @@ async function run() {
       const token = jwt.sign(users, process.env.ACCESS_TOKEN,  { expiresIn: '1000h' });
       res.send({token});
     })
+    
 
+
+    // for user create 
+    app.post('/users', async(req, res)=> {
+
+      const user = req.body;
+   
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+
+    })
 
     app.put('/users/:email', async (req, res) => {
       const email = req.params.email;
@@ -142,7 +155,7 @@ async function run() {
 
 
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
