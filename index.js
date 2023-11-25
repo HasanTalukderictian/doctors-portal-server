@@ -105,34 +105,20 @@ async function run() {
 
 
     // for user create 
-    app.post('/users', async(req, res)=> {
-
+    app.put('/users/:email', async(req, res)=> {
+      const email = req.params.email;
+      const filter = { email: email }
       const user = req.body;
-   
-      const result = await usersCollection.insertOne(user);
+      const options = { upsert: true };
+      const updateDoc = {
+            $set: user,
+          }
+      const result = await usersCollection.updateOne(filter, updateDoc,options);
       res.send(result);
 
     })
 
-    app.put('/users/:email', async (req, res) => {
-      const email = req.params.email;
-      const user = req.body;
-      const filter = { email: email }
-      const options = { upsert: true };
-      const updateDoc = {
-        $set: user,
-      }
-      const result = await usersCollection.updateOne(filter, updateDoc, options);
-      res.send(user);
-    })
-
-    // app.get('/booking', async(req, res) => {
-    //   const patient = req.query.email;
-    //   const query = { patient: patient}
-    //   const bookings = await bookingColletion.find(query).toArray();
-    //   res.send(bookings);
-    // })
-
+  
 
 
     app.get('/booking', verifyJwt, async (req, res) => {
