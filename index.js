@@ -12,13 +12,14 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 
+
 app.use(cors())
 app.use(express.json())
 
 
 
 const verifyJwt = (req, res, next) => {
-  console.log('hitting VerifyJwt');
+  // console.log('hitting VerifyJwt');
 
   const authorization = req.headers.authorization;
   if (!authorization) {
@@ -98,46 +99,57 @@ async function run() {
     app.post('/jwt', async (req, res) => {
       const users = req.body;
       console.log(users);
-      const token = jwt.sign(users, process.env.ACCESS_TOKEN,  { expiresIn: '1000h' });
-      res.send({token});
+      const token = jwt.sign(users, process.env.ACCESS_TOKEN, { expiresIn: '1000h' });
+      res.send({ token });
     })
-    
+
 
 
     // for user create 
-    app.put('/users/:email', async(req, res)=> {
+    app.put('/users/:email', async (req, res) => {
       const email = req.params.email;
       const filter = { email: email }
       const user = req.body;
       const options = { upsert: true };
       const updateDoc = {
-            $set: user,
-          }
-      const result = await usersCollection.updateOne(filter, updateDoc,options);
+        $set: user,
+      }
+      const result = await usersCollection.updateOne(filter, updateDoc, options);
       res.send(result);
 
     })
 
     // making user admin 
-    app.put('/users/admin/:email', verifyJwt, async(req, res)=> {
+    app.put('/users/admin/:email', verifyJwt,  async (req, res) => {
       const email = req.params.email;
       const filter = { email: email }
- 
       const updateDoc = {
-            $set:{role: 'admin'},
-          }
+        $set: { role: 'admin' },
+      }
       const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result);
 
-    })
-    
+    });
+
 
     // trying to get users 
-    app.get('/allusers', verifyJwt,  async(req, res) => {
+    app.get('/allusers', verifyJwt, async (req, res) => {
       const users = await usersCollection.find().toArray();
       res.send(users);
     })
-  
+
+    // check admin 
+    app.get('/admin/:email', async (req, res) => {
+      const email = req.params.email;
+      const user = await usersCollection.findOne({ email: email });
+
+      if (user) {
+        const isAdmin = user.role === 'admin';
+        res.send({ admin: isAdmin });
+      } else {
+        res.status(404).send({ error: 'User not found' });
+      }
+    });
 
 
     app.get('/booking', verifyJwt, async (req, res) => {
