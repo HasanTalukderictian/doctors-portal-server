@@ -117,7 +117,13 @@ async function run() {
       res.send(result);
 
     })
+    
 
+    // trying to get users 
+    app.get('/allusers',  async(req, res) => {
+      const users = await usersCollection.find().toArray();
+      res.send(users);
+    })
   
 
 
