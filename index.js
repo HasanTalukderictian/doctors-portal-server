@@ -117,10 +117,23 @@ async function run() {
       res.send(result);
 
     })
+
+    // making user admin 
+    app.put('/users/admin/:email', verifyJwt, async(req, res)=> {
+      const email = req.params.email;
+      const filter = { email: email }
+ 
+      const updateDoc = {
+            $set:{role: 'admin'},
+          }
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+
+    })
     
 
     // trying to get users 
-    app.get('/allusers',  async(req, res) => {
+    app.get('/allusers', verifyJwt,  async(req, res) => {
       const users = await usersCollection.find().toArray();
       res.send(users);
     })
