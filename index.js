@@ -122,13 +122,16 @@ async function run() {
     // making user admin 
     app.put('/users/admin/:email', verifyJwt,  async (req, res) => {
       const email = req.params.email;
-      const filter = { email: email }
-      const updateDoc = {
-        $set: { role: 'admin' },
-      }
-      const result = await usersCollection.updateOne(filter, updateDoc);
-      res.send(result);
-
+  
+    
+        const filter = { email: email }
+        const updateDoc = {
+          $set: { role: 'admin' },
+        }
+        const result = await usersCollection.updateOne(filter, updateDoc);
+        res.send(result);
+     
+     
     });
 
 
