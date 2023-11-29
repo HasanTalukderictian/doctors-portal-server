@@ -57,6 +57,7 @@ async function run() {
     const bookingColletion = client.db("DoctorsPortal").collection("bookings");
     const serviceCollection = client.db("DoctorsPortal").collection("services");
     const usersCollection = client.db("DoctorsPortal").collection("users");
+    const DoctorsCollection = client.db("DoctorsPortal").collection("Doctors");
 
     app.post('/bookings', async (req, res) => {
       const booking = req.body;
@@ -139,6 +140,12 @@ async function run() {
     app.get('/allusers', verifyJwt, async (req, res) => {
       const users = await usersCollection.find().toArray();
       res.send(users);
+    })
+
+    // trying to get Doctors collection
+    app.get('/doctors', async(req, res) => {
+      const doctors = await DoctorsCollection.find().toArray();
+      res.send(doctors);
     })
 
     // check admin 
