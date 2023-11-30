@@ -143,10 +143,19 @@ async function run() {
     })
 
     // trying to get Doctors collection
-    app.get('/doctors', async(req, res) => {
+    app.get('/doctors',  async(req, res) => {
       const doctors = await DoctorsCollection.find().toArray();
       res.send(doctors);
     })
+
+    // trying to post DOCTORS  api
+
+    app.post('/doctors', verifyJwt, async(req, res) => {
+      const data = req.body;
+      const result = await DoctorsCollection.insertOne(data);
+      res.send(result);
+    })
+
 
     // check admin 
     app.get('/admin/:email', async (req, res) => {
