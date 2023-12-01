@@ -58,6 +58,7 @@ async function run() {
     const serviceCollection = client.db("DoctorsPortal").collection("services");
     const usersCollection = client.db("DoctorsPortal").collection("users");
     const DoctorsCollection = client.db("DoctorsPortal").collection("Doctors");
+    const MessageCollection = client.db("DoctorsPortal").collection("Message");
 
     app.post('/bookings', async (req, res) => {
       const booking = req.body;
@@ -142,10 +143,52 @@ async function run() {
       res.send(users);
     })
 
+    app.post('/message', verifyJwt,async(req, res) => {
+      const Message = req.body;
+      const result = await MessageCollection.insertOne(Message);
+      res.send(result);
+
+    })
+
+    // delete User from Admin 
+
+    app.delete('/allusers/:id',verifyJwt, async (req, res) => {
+      const { id } = req.params;
+    
+      // Check if the authenticated user has the 'admin' role
+      if (req.user && req.user.role === 'admin') {
+        const query = { _id: new ObjectId(id) };
+    
+        try {
+          const result = await usersCollection.deleteOne(query);
+    
+          if (result.deletedCount > 0) {
+            res.json({ success: true, message: 'User deleted successfully' });
+          } else {
+            res.json({ success: false, message: 'User not found' });
+          }
+        } catch (error) {
+          console.error('Error deleting user:', error);
+          res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+      } else {
+        res.status(403).json({ success: false, message: 'Permission denied' });
+      }
+    });
     // trying to get Doctors collection
     app.get('/doctors',  async(req, res) => {
       const doctors = await DoctorsCollection.find().toArray();
       res.send(doctors);
+    })
+
+    // trying to delete doctor item 
+
+    app.delete('/doctors/:id',  async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await DoctorsCollection.deleteOne(query);
+      res.send(result);
+
     })
 
     // trying to post DOCTORS  api
