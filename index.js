@@ -59,6 +59,8 @@ async function run() {
     const usersCollection = client.db("DoctorsPortal").collection("users");
     const DoctorsCollection = client.db("DoctorsPortal").collection("Doctors");
     const MessageCollection = client.db("DoctorsPortal").collection("Message");
+    const ReviewCollection = client.db("DoctorsPortal").collection("review");
+   
 
     app.post('/bookings', async (req, res) => {
       const booking = req.body;
@@ -121,6 +123,12 @@ async function run() {
 
     })
 
+    app.get('/review', async(req, res) => {
+    
+      const result = await ReviewCollection.find().toArray();
+      res.send(result);
+    })
+
     // making user admin 
     app.put('/users/admin/:email', verifyJwt,  async (req, res) => {
       const email = req.params.email;
@@ -146,6 +154,13 @@ async function run() {
     app.post('/message', verifyJwt,async(req, res) => {
       const Message = req.body;
       const result = await MessageCollection.insertOne(Message);
+      res.send(result);
+
+    })
+
+    app.post('/review', verifyJwt,async(req, res) => {
+      const review = req.body;
+      const result = await ReviewCollection.insertOne(review);
       res.send(result);
 
     })
