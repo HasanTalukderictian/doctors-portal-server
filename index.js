@@ -196,15 +196,50 @@ async function run() {
       res.send(doctors);
     })
 
+     // trying to get Doctors collection
+     app.get('/doctors/:id', async (req, res) => {
+      const { id } = req.params; // Use req.params to get the parameter from the URL
+      const query = { _id: new ObjectId(id) };
+    
+      try {
+        const doctor = await DoctorsCollection.findOne(query);
+    
+        if (!doctor) {
+          return res.status(404).send("Doctor not found");
+        }
+    
+        res.json(doctor);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
     // trying to delete doctor item 
 
-    app.delete('/doctors/:id',  async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) }
-      const result = await DoctorsCollection.deleteOne(query);
-      res.send(result);
-
-    })
+    app.delete('/doctors/:id', verifyJwt, async (req, res) => {
+      const { id } = req.params;
+    
+      // Check if the authenticated user has the 'admin' role
+      if (req.user && req.user.role === 'admin') {
+        const query = { _id: new ObjectId(id) };
+    
+        try {
+          const result = await DoctorsCollection.deleteOne(query);
+    
+          if (result.deletedCount > 0) {
+            res.json({ success: true, message: 'Doctor deleted successfully' });
+          } else {
+            res.json({ success: false, message: 'Doctor not found' });
+          }
+        } catch (error) {
+          console.error('Error deleting doctor:', error);
+          res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+      } else {
+        res.status(403).json({ success: false, message: 'Permission denied' });
+      }
+    });
 
     // trying to post DOCTORS  api
 
